@@ -2,7 +2,7 @@
 class LastpassSshAgent < Formula
   desc "SSH agent backed by the LastPass CLI: keys never persist on disk"
   homepage "https://github.com/lexbrugman/lastpass-ssh-agent"
-  version "2026.811.0"
+  version "2026.811.1"
   license "MIT"
 
   depends_on "lastpass-cli"
@@ -17,23 +17,23 @@ class LastpassSshAgent < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.0/lastpass-ssh-agent-aarch64-apple-darwin.tar.xz"
-      sha256 "b4cd62244c382d1a20e9c761ec21be360a03d87df581abcca9100187561a36ff"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.1/lastpass-ssh-agent-aarch64-apple-darwin.tar.xz"
+      sha256 "688148d683335421f79d1d9bdb2f2484976b31da6e81451a38b78fe78b48885f"
     end
     on_intel do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.0/lastpass-ssh-agent-x86_64-apple-darwin.tar.xz"
-      sha256 "ac0be74baec1863c74a325694dd50a55a19aabcb1d65962c7192ad763a27a81b"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.1/lastpass-ssh-agent-x86_64-apple-darwin.tar.xz"
+      sha256 "2598bf7b99f43ae49d34f2786fa6cc0ed850217f6e266e089f96ae0aaee3cd1a"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.0/lastpass-ssh-agent-aarch64-unknown-linux-musl.tar.xz"
-      sha256 "45eb4971b8fadd536a0092a7609f91ccdf127954fb80f3fb81d2de26adaab8c4"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.1/lastpass-ssh-agent-aarch64-unknown-linux-musl.tar.xz"
+      sha256 "a786715075ae9bd5eedf2b281d07a58792ba617ec7574b6053f8930d7076b731"
     end
     on_intel do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.0/lastpass-ssh-agent-x86_64-unknown-linux-musl.tar.xz"
-      sha256 "7ad2cc7fea4d45595528022533da3c4c7d5953d5e042e1a304b945f366b73a53"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.1/lastpass-ssh-agent-x86_64-unknown-linux-musl.tar.xz"
+      sha256 "8d9486674bb37db3e0f085d83b404ea8f0396f064c6a75f8ae9467b42116d26e"
     end
   end
 
@@ -68,62 +68,38 @@ class LastpassSshAgent < Formula
 
         brew services start lastpass-ssh-agent
 
-      It then starts again at every login. Homebrew does not restart running
-      services on upgrade, so after `brew upgrade` the old binary keeps
-      serving until the next login unless you restart it yourself:
+      It restarts at every login. Homebrew does not restart services on
+      upgrade, so after `brew upgrade` the old binary keeps serving until you
+      do:
 
         brew services restart lastpass-ssh-agent
 
-      On Linux a --user service only runs while you have a session. To keep
-      the agent up without one:
+      Do NOT use `sudo brew services`: a system daemon has no GUI session, so
+      every confirmation fails closed and nothing is ever signed.
 
-        loginctl enable-linger "$USER"
-
-      Do NOT use `sudo brew services`: as a system daemon the agent has no
-      GUI session, so every confirmation prompt fails closed and no signature
-      is ever approved.
-
-      On Linux the default confirmation mode is "tty", which a background
-      service has no terminal for. Set an askpass helper in
-      ~/.config/lastpass-ssh-agent/config.toml before starting the service:
+      On Linux, a --user service runs only while you have a session
+      (`loginctl enable-linger "$USER"` keeps it up without one), and the
+      default "tty" confirmation has no terminal. Set a helper in
+      ~/.config/lastpass-ssh-agent/config.toml before starting it:
 
         confirm = "askpass"
         askpass = "/usr/bin/ssh-askpass"
 
-      Point SSH at the agent. The socket path differs per platform, so take
-      it from the agent rather than guessing:
+      Point SSH at the agent. The socket path differs per platform, so ask:
 
         lastpass-ssh-agent env
 
-      and put that path in ~/.ssh/config:
+      and put that path in ~/.ssh/config, remembering that IdentityAgent
+      overrides SSH_AUTH_SOCK for the hosts it matches:
 
         Host *
             IdentityAgent "<the path printed above>"
 
-      Note that IdentityAgent overrides SSH_AUTH_SOCK for the hosts it matches.
+      There is a dev track (`brew install --HEAD`), which builds from source
+      and does not move forward on a plain `brew upgrade`. Switching either
+      way is documented at:
 
-      To follow the dev branch instead of releases, replace the install. It
-      builds from source, so this pulls in a Rust toolchain:
-
-        brew uninstall lastpass-ssh-agent
-        brew install --HEAD lastpass-ssh-agent
-
-      Switching tracks is always uninstall-then-install: `brew reinstall` has
-      no --HEAD option, and cannot move an install between the two.
-
-      A HEAD install does NOT move forward on a plain `brew upgrade` — brew
-      only checks whether the branch advanced when asked to:
-
-        brew upgrade --fetch-HEAD lastpass-ssh-agent
-
-      And back to the latest release:
-
-        brew uninstall lastpass-ssh-agent
-        brew install lastpass-ssh-agent
-
-      Either switch replaces the binary, not the running agent, so restart the
-      service afterwards. Saved Keychain passphrases are keyed by SSH key
-      fingerprint and survive the switch.
+        https://github.com/lexbrugman/lastpass-ssh-agent#following-the-dev-branch
     EOS
   end
 
