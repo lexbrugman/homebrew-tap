@@ -2,35 +2,47 @@
 class LastpassSshAgent < Formula
   desc "SSH agent backed by the LastPass CLI: keys never persist on disk"
   homepage "https://github.com/lexbrugman/lastpass-ssh-agent"
-  version "2026.811.2"
+  version "2026.811.0"
   license "MIT"
 
   depends_on "lastpass-cli"
 
+  # The dev track. `brew install --HEAD` builds the dev branch from source,
+  # which is why rust is a build dependency here and nowhere else: a release
+  # install unpacks a prebuilt binary and needs no compiler.
+  head do
+    url "https://github.com/lexbrugman/lastpass-ssh-agent.git", branch: "dev"
+    depends_on "rust" => :build
+  end
+
   on_macos do
     on_arm do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.2/lastpass-ssh-agent-aarch64-apple-darwin.tar.xz"
-      sha256 "40d0c4d39efe451520da0cf138f11d265724cb2b3c9b78d86eb5bbeaa38e9e09"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.0/lastpass-ssh-agent-aarch64-apple-darwin.tar.xz"
+      sha256 "b4cd62244c382d1a20e9c761ec21be360a03d87df581abcca9100187561a36ff"
     end
     on_intel do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.2/lastpass-ssh-agent-x86_64-apple-darwin.tar.xz"
-      sha256 "34ac623d9f6255eb2ca1263febe3644018eecc3fb9fc5bfd2b9444fa8269c0fa"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.0/lastpass-ssh-agent-x86_64-apple-darwin.tar.xz"
+      sha256 "ac0be74baec1863c74a325694dd50a55a19aabcb1d65962c7192ad763a27a81b"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.2/lastpass-ssh-agent-aarch64-unknown-linux-musl.tar.xz"
-      sha256 "26497fa28bfd62b8ab24ebc6ea47ece14520764a21e4a6ea6d30558b8b38b77c"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.0/lastpass-ssh-agent-aarch64-unknown-linux-musl.tar.xz"
+      sha256 "45eb4971b8fadd536a0092a7609f91ccdf127954fb80f3fb81d2de26adaab8c4"
     end
     on_intel do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.2/lastpass-ssh-agent-x86_64-unknown-linux-musl.tar.xz"
-      sha256 "7834efbfd3b4173f54abc54eab4e8bb9743cae45bcebe650ebf256bef5b2ba17"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.811.0/lastpass-ssh-agent-x86_64-unknown-linux-musl.tar.xz"
+      sha256 "7ad2cc7fea4d45595528022533da3c4c7d5953d5e042e1a304b945f366b73a53"
     end
   end
 
   def install
-    bin.install "lastpass-ssh-agent"
+    if build.head?
+      system "cargo", "install", *std_cargo_args
+    else
+      bin.install "lastpass-ssh-agent"
+    end
   end
 
   # `brew services start lastpass-ssh-agent` installs this as a launchd user
@@ -89,11 +101,45 @@ class LastpassSshAgent < Formula
             IdentityAgent "<the path printed above>"
 
       Note that IdentityAgent overrides SSH_AUTH_SOCK for the hosts it matches.
+
+      To follow the dev branch instead of releases, replace the install. It
+      builds from source, so this pulls in a Rust toolchain:
+
+        brew uninstall lastpass-ssh-agent
+        brew install --HEAD lastpass-ssh-agent
+
+      Switching tracks is always uninstall-then-install: `brew reinstall` has
+      no --HEAD option, and cannot move an install between the two.
+
+      A HEAD install does NOT move forward on a plain `brew upgrade` — brew
+      only checks whether the branch advanced when asked to:
+
+        brew upgrade --fetch-HEAD lastpass-ssh-agent
+
+      And back to the latest release:
+
+        brew uninstall lastpass-ssh-agent
+        brew install lastpass-ssh-agent
+
+      Either switch replaces the binary, not the running agent, so restart the
+      service afterwards. Saved Keychain passphrases are keyed by SSH key
+      fingerprint and survive the switch.
     EOS
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/lastpass-ssh-agent --version")
+    # A release install must report exactly the version the formula claims —
+    # a mismatch there means the formula and the binary came from different
+    # builds. A head install cannot: brew calls it HEAD-<sha> while the binary
+    # describes itself against the newest release tag it can see, so check the
+    # name instead. Decided from `version` rather than `build`, which is not
+    # dependable in a test.
+    expected = if version.to_s.start_with?("HEAD")
+      "lastpass-ssh-agent"
+    else
+      version.to_s
+    end
+    assert_match expected, shell_output("#{bin}/lastpass-ssh-agent --version")
     # doctor exits nonzero without a LastPass login, but must still run
     assert_match "lpass", shell_output("#{bin}/lastpass-ssh-agent doctor 2>&1", 1)
   end
