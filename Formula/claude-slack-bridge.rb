@@ -2,9 +2,9 @@
 class ClaudeSlackBridge < Formula
   desc "Two-way bridge between Claude Code and Slack, over Socket Mode"
   homepage "https://github.com/lexbrugman/claude-slack-bridge"
-  url "https://github.com/lexbrugman/claude-slack-bridge/releases/download/v2026.825.0/claude-slack-bridge-2026.825.0.tar.gz"
-  version "2026.825.0"
-  sha256 "20984700b9688abc93cfba548b885a3697beb06fac2aebbea1917f79bbe1d89a"
+  url "https://github.com/lexbrugman/claude-slack-bridge/releases/download/v2026.825.1/claude-slack-bridge-2026.825.1.tar.gz"
+  version "2026.825.1"
+  sha256 "9919a6f8d19bce07c49819734fe356c3419a23082ff21b077e40e54350513042"
   license "MIT"
 
   # The dev track: `brew install --HEAD` installs the tip of main instead of a
