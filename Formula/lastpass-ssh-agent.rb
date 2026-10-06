@@ -2,7 +2,7 @@
 class LastpassSshAgent < Formula
   desc "SSH agent backed by the LastPass CLI: keys never persist on disk"
   homepage "https://github.com/lexbrugman/lastpass-ssh-agent"
-  version "2026.1006.0"
+  version "2026.1006.1"
   license "MIT"
 
   depends_on "lastpass-cli"
@@ -17,23 +17,23 @@ class LastpassSshAgent < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.1006.0/lastpass-ssh-agent-aarch64-apple-darwin.tar.xz"
-      sha256 "61714cf20712993a9c59326c4b87856516ef4ae14edfeb6142d29660eeaa21e3"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.1006.1/lastpass-ssh-agent-aarch64-apple-darwin.tar.xz"
+      sha256 "0baffb87bd30a98e7dc85e5b6d9109fd790900d0cb8a8e80712cfa4ec7382fde"
     end
     on_intel do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.1006.0/lastpass-ssh-agent-x86_64-apple-darwin.tar.xz"
-      sha256 "61936f5b8b983c82a37e19d216229f67387b59267d9a77a86f6aa9658922b76c"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.1006.1/lastpass-ssh-agent-x86_64-apple-darwin.tar.xz"
+      sha256 "006001106be3bbdac6f57cd51f34ff52317411d0e424ee9de45d73f4607537fa"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.1006.0/lastpass-ssh-agent-aarch64-unknown-linux-musl.tar.xz"
-      sha256 "aaf5fab3632466e1e5bde5c744c19a5b7d722d6deb3a40c2bdeed71f7b0a8e64"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.1006.1/lastpass-ssh-agent-aarch64-unknown-linux-musl.tar.xz"
+      sha256 "3416f03e4a275c0cb7b48a556d5d5f509d00e41ab7cf4f907384ee524a1126d9"
     end
     on_intel do
-      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.1006.0/lastpass-ssh-agent-x86_64-unknown-linux-musl.tar.xz"
-      sha256 "8c222db8f90813b26f10f68b92f73ddbfea688aee9720f341f38cf6697dc8753"
+      url "https://github.com/lexbrugman/lastpass-ssh-agent/releases/download/v2026.1006.1/lastpass-ssh-agent-x86_64-unknown-linux-musl.tar.xz"
+      sha256 "5ac0598504833d0fecf7d123aee7df413c11eca1b76743bb4e394bde238c3014"
     end
   end
 
